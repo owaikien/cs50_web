@@ -1,0 +1,14 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <h1>Posts from users you follow</h1>
+
+    {% for post in posts %} 
+    <div class="post" style="margin-left: 20px;">
+        <h2><a href = "{%url 'profile' post.user.username%}">{{ post.user.username }}</a></h2>
+        <p>{{post.content}}</p>
+        <p><small>{{ post.timestamp }}</small></p>
+        <p>{{ post.likes }} likes</p>
+    </div>
+    {% endfor %}
+{% endblock %}

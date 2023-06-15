@@ -1,0 +1,167 @@
+{% extends "network/layout.html" %}
+{% load network_filters %}
+
+{% block body %}
+    <h1> All Posts </h1>    
+    {% if user.is_authenticated %}
+     <br>
+     <h2>New Post</h2>
+     <form id = 'new-post-form' action = "{% url 'newpost' %}" method="post">
+        {%csrf_token%}
+        <textarea id="new-post-content" rows="4" cols="50" placeholder="What's on your mind?"></textarea><br>
+        <button type="submit" class="btn-btn primary">Post</button>
+     </form>
+
+     <script>
+        document.querySelector("#new-post-form").addEventListener("submit", function(event){
+            event.preventDefault();
+            fetch('/newpost', {
+                method: 'POST',
+                body: JSON.stringify({
+                    content: document.querySelector("#new-post-content").value
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                // Print result
+                console.log(result);
+
+                // Refresh page to see new post
+                window.location.reload();
+            });
+        });
+    </script>
+    {% endif %}
+
+    {% for post in page_obj %} 
+    <div class="post" data-post-id="{{ post.id }}" style="margin-left: 20px;">
+        <h2><a href = "{%url 'profile' post.user.username%}">{{ post.user.username }}</a></h2>
+        <p>{{post.content}}</p>
+        <p><small>{{ post.timestamp }}</small></p>
+        <button class="like-button" data-liked = "{{ post|is_liked_by:user }}" >{{ post|is_liked_by:user|yesno:"Unlike,Like"}}</button>
+        <p class="like-count">{{ post.likes.count }} likes</p>
+
+        <!-- Edit post button -->
+        {% if post.user == user %}
+            <button class="edit-button">Edit</button>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    <!-- JS script for like posts -->
+    <script>
+        document.querySelectorAll(".like-button").forEach(button => {
+            button.addEventListener('click', () => {
+                // Get the post div
+                const postDiv = button.parentElement;
+
+                // Get the post ID
+                const postId = postDiv.dataset.postId;
+
+                // Determine current like status
+                const liked = button.dataset.liked == 'true';
+
+                // Send request to server
+                fetch(`/like/${postId}`, {
+                    method: 'PUT', 
+                    body: JSON.stringify({
+                        like: !liked
+                    })
+                })
+
+                .then(response => response.json())
+                .then(result => {
+                    // Update like count
+                    postDiv.querySelector('.like-count').textContent = `${result.likes} likes`
+                    
+                    // Update the like status
+                    button.dataset.liked = !liked
+                    button.textContent = liked? 'Like' : 'Unlike'
+                })
+            })
+        })
+    </script>
+
+    <!-- JS script for editing posts -->
+    <script>
+        document.querySelectorAll('.edit-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Get the post div
+                const postDiv = button.parentElement;
+
+                // Get the post ID
+                const postId = postDiv.dataset.postId;
+
+                // Get the post content
+                const contentP = postDiv.querySelector('p');
+                const content = contentP.textContent;
+
+                // Replace the post content with text area
+                const textarea = document.createElement('textarea');
+                textarea.value = content;
+                contentP.replaceWith(textarea);
+                
+                // Hide the Edit button
+                button.style.display = 'none';
+
+                // Create a save button
+                const saveButton = document.createElement('button');
+                saveButton.textContent = 'save';
+                postDiv.appendChild(saveButton);
+
+                // Add an event listener to the saveButton
+                saveButton.addEventListener('click', () => {
+                    fetch(`/edit_post/${postId}`, {
+                        method: "POST",
+                        body: JSON.stringify({
+                            content: textarea.value
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        // Print result
+                        console.log(result);
+
+                        // Update the post content without reloading the page
+                        const updatedContentP = document.createElement('p')
+                        updatedContentP.textContent = result.content;
+                        textarea.replaceWith(updatedContentP);
+
+                        // Remove the Save button
+                        postDiv.removeChild(saveButton);
+
+                        // Show back the edit button
+                        button.style.display = 'block';
+                    });
+                });
+            });
+        });
+    </script>
+
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="{% url 'index' %}?page={{ page_obj.previous_page_number }}">Previous</a></li>
+            {% else %}
+                <li class="page-item disabled"><span class = 'page-link'>Previous</span></li>
+            {% endif %}
+
+            {% for i in page_obj.paginator.page_range %} 
+                {% if page_obj.number == i %} 
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link"> {{ i }} </span>
+                    </li>
+                {% else %} 
+                    <li class="page-item"><a class='page-link' href = "{% url 'index' %}?page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="{% url 'index' %}?page={{ page_obj.next_page_number }}">Next</a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class = 'page-link'>Next</span></li>
+                {% endif %}
+        </ul>
+      </nav>
+
+{% endblock %}

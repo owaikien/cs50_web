@@ -1,0 +1,30 @@
+{% extends "network/layout.html" %}
+
+{% block body %} 
+
+    <h1> {{ profile_user.username }} </h1><br>
+
+    <h3> Followers: {{ profile_user.profile.followed_by.count }}</h3><br>
+    <h3> Following: {{profile_user.profile.follows.count }} </h3><br>
+
+    {% if profile_user != request.user %}
+        <form id="follow-form" action= "{% url 'follow' profile_user.username %}" method ="POST">
+            {% csrf_token %}
+            {% if is_following %}
+                <button type="submit">Unfollow</button>
+            {% else %} 
+                <button type="submit">Follow</button>
+            {% endif %}
+        </form>
+    {% endif %} 
+    
+    <h2>Posts:</h2>
+    {% for post in posts %} 
+    <div class="post" style="margin-left: 20px;">
+        <h2>{{ post.user.username }}</h2>
+        <p>{{post.content}}</p>
+        <p><small>{{ post.timestamp }}</small></p>
+        <p>{{ post.likes }} likes</p>
+    </div>
+    {% endfor %}
+{% endblock %}
