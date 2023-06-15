@@ -1,2 +1,16 @@
 # cs50_web
-My completed projects for for CS50’s Web Programming with Python and JavaScript
+Repository to store my answers for the projects for CS50's Web Programming with Python and JavaScript
+
+The projects were quite challenging but it is definitely doable. It took me quite a while to complete all the projects but it is definitely rewarding. 
+
+The content covered:
+
+HTML, CSS
+Git
+Python
+Django
+SQL, Models, and Migrations
+JavaScript
+User Interfaces
+Testing, CI/CD
+Scalability and Security
