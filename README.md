@@ -5,12 +5,12 @@ The projects were quite challenging but it is definitely doable. It took me quit
 
 The content covered:
 
-HTML, CSS
-Git
-Python
-Django
-SQL, Models, and Migrations
-JavaScript
-User Interfaces
-Testing, CI/CD
-Scalability and Security
+HTML, CSS <br>
+Git <br>
+Python <br>
+Django <br>
+SQL, Models, and Migrations <br>
+JavaScript <br>
+User Interfaces <br>
+Testing, CI/CD <br>
+Scalability and Security <br>
