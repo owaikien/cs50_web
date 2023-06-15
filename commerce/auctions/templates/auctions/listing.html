@@ -1,0 +1,74 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <div>
+        {% if user.is_authenticated %} 
+            {% if isListing %}
+                <form action="{%url 'removeWatchList' id=listing.id%}" method = "POST">
+                    {% csrf_token %} 
+                    <button type="submit" class="btn btn-danger">Remove From Watchlist</button>
+                </form>
+            {% else %} 
+                <form action="{%url 'addWatchList' id=listing.id%}" method = "POST">
+                    {% csrf_token %} 
+                    <button type="submit" class="btn btn-success">Add To Watchlist</button>
+                </form>
+            {% endif %}
+        {% endif %}    
+    </div>
+
+
+    <h1>Plushie: {{ listing.title }} </h1>
+    <img src="{{listing.imageurl}}" alt="{{ listing.title}}" width="50%" height="30%">
+    <p>{{ listing.description }}</p>
+    <p>Listing: {{ listing.onwer}}</p>
+    <h4>${{ listing.price.bid }}</h4>
+
+    <form action="{% url 'bid' id=listing.id%}" method="POST">
+        {%csrf_token%}
+        <div class="form-group">
+            <label for="bid">Place a bid</label>
+            <input type="number" name="bid" min="{{listing.price.bid}}" step="0.01" class="form-control" placeholder="Enter your bid">
+        </div>
+        <button type="submit" class="btn-btn primary">Place Bid</button>
+    </form>
+    <br/>
+    {% if user.is_authenticated and user == listing.owner and listing.isActive %} 
+        <form action="{% url 'close' id=listing.id %}" method="POST" >
+            {%csrf_token%}
+            <input type="submit" value="Close Auction" >
+        </form>
+    {% endif %}
+    <h2>Comments</h2>
+    <br/>
+    {% if user.is_authenticated %} 
+        <form action="{% url 'addComments' id=listing.id %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="comments"> Add Comments</label>
+                <input type="text" name="newComment" placehold="Add New Comment">
+                <button type="submit" class="btn-btn primary">Add</button>
+            </div>
+        </form>
+    {% endif %}
+    <br/>
+    <ul class="list-group">
+        {% for comment in allComments%}
+            <li class="list-group-item">
+                {{ comment.comments }}
+                <br/> <br/>
+                <p>Posted by <strong>{{ comment.owner }}</strong></p>
+            </li> 
+        {% endfor %}
+    </ul>
+
+{% endblock %}
